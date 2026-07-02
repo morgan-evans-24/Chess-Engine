@@ -26,7 +26,7 @@ class DebugUtils {
         static void startMoveTimer();
         static void printMoveTime();
         static void printNumExploredPositions();
-        static constexpr bool debugMode = true;
+        static constexpr bool debugMode = false;
         static int numExploredPositions;
         static int numExploredQuiescencePositions;
 

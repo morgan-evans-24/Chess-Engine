@@ -29,7 +29,24 @@ MoveGenerator::MoveGenerator() {
     std::srand(std::time(nullptr));
 }
 
+bool isThreefoldRepetition(const std::vector<uint64_t>& history) {
+    uint64_t current = history.back();
+    int occurrences = 0;
+
+    for (auto it = history.rbegin(); it != history.rend(); ++it) {
+        if (*it == current) {
+            ++occurrences;
+            if (occurrences == 3)
+                return true;
+        }
+    }
+
+    return false;
+}
+
 Move MoveGenerator::getBestMove(Board& board, const int depth) {
+    zobristHistory.clear();
+    zobristHistory.push_back(board.zobristHash);
     vector<Move> moves;
     generateLegalMoves(moves, board, false);
     auto bestMove= Move(0,0,Piece::WHITE_PAWN);
@@ -44,16 +61,22 @@ Move MoveGenerator::getBestMove(Board& board, const int depth) {
     for (const Move& move : moves) {
         uint64_t oldZobrist = board.zobristHash;
         board.makeMove(move);
+        zobristHistory.push_back(board.zobristHash);
         uint64_t newZobrist = board.zobristHash;
         int score;
+        if (isThreefoldRepetition(zobristHistory)) {
+            score = 0;
+        } else {
+            score = -negaMax(board, depth - 1, -beta, -alpha);
+            assert(board.zobristHash == newZobrist);
+        }
 
-        score = -negaMax(board, depth - 1, -beta, -alpha);
-        assert(board.zobristHash == newZobrist);
 
         DebugUtils::numExploredPositions++;
         // For a depth of 3
         // generate moves once in here
         // flip result of negaMax
+        zobristHistory.pop_back();
         board.unmakeMove(move);
         assert(board.zobristHash == oldZobrist);
 
@@ -98,8 +121,12 @@ int MoveGenerator::negaMax(Board& board, int depth, int alpha, int beta) {
 
         int score;
 
-        score = -negaMax(board, depth - 1, -beta, -alpha);
-        assert(board.zobristHash == newZobrist);
+        if (isThreefoldRepetition(zobristHistory)) {
+            score = 0;
+        } else {
+            score = -negaMax(board, depth - 1, -beta, -alpha);
+            assert(board.zobristHash == newZobrist);
+        }
 
         DebugUtils::numExploredPositions++;
         board.unmakeMove(move);

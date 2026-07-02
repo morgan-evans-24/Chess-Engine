@@ -13,7 +13,7 @@ using std::string;
 
 #include <array>
 
-int BoardManager::depth = 5;
+int BoardManager::depth = 6;
 
 BoardManager::BoardManager() {
     board = Board();

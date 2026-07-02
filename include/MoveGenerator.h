@@ -39,6 +39,8 @@ class MoveGenerator {
         void generateLegalMoves(std::vector<Move>& outMoves, Board& board, bool onlyCaptures);
         void testZobristHash(Board& board, Move move);
     private:
+        std::vector<uint64_t> zobristHistory;
+
         std::mt19937 rng;
         int INF = 1'000'000;
         int MATE_SCORE = 900'000;

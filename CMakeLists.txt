@@ -3,9 +3,9 @@ project(Chess_Engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto")
+#set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto")
 
 add_executable(Chess_Engine src/main.cpp
         src/UCIManager.cpp
@@ -36,4 +36,6 @@ add_executable(Chess_Engine src/main.cpp
         include/UCILogger.h
         src/Zobrist.cpp
         include/Zobrist.h
+        src/TranspositionTable.cpp
+        include/TranspositionTable.h
 )

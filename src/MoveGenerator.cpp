@@ -4,10 +4,9 @@
 
 #include "../include/MoveGenerator.h"
 
+#include <algorithm>
 #include <cassert>
-#include <climits>
 #include <iostream>
-#include <ostream>
 #include <ranges>
 #include <vector>
 
@@ -17,6 +16,7 @@
 #include "../include/rook_table.h"
 #include "../include/bishop_table.h"
 #include "../include/RuleChecker.h"
+#include "../include/TranspositionTable.h"
 
 using std::vector;
 using std::pair;
@@ -24,7 +24,7 @@ using std::to_string;
 
 auto shift = Board::shift;
 
-MoveGenerator::MoveGenerator() {
+MoveGenerator::MoveGenerator() : transpositionTable(256) {
     evaluator = Evaluator();
     std::srand(std::time(nullptr));
 }
@@ -47,7 +47,7 @@ bool isThreefoldRepetition(const std::vector<uint64_t>& history) {
 Move MoveGenerator::getBestMove(Board& board, const int depth) {
     vector<Move> moves;
     generateLegalMoves(moves, board, false);
-    auto bestMove= Move(0,0,Piece::WHITE_PAWN);
+    auto bestMove = Move(0,0,Piece::WHITE_PAWN);
 
     // Best guarenteed move for me so far
     int alpha = -INF;
@@ -55,7 +55,6 @@ Move MoveGenerator::getBestMove(Board& board, const int depth) {
     int beta = INF;
 
     bool moveFound = false;
-    int maxScore = -INF;
     for (const Move& move : moves) {
         uint64_t oldZobrist = board.zobristHash;
         board.makeMove(move);
@@ -78,7 +77,6 @@ Move MoveGenerator::getBestMove(Board& board, const int depth) {
         board.unmakeMove(move);
         assert(board.zobristHash == oldZobrist);
 
-        // DebugUtils::prettyPrintMove(move);
 
         if (score > alpha) {
             moveFound = true;
@@ -91,7 +89,8 @@ Move MoveGenerator::getBestMove(Board& board, const int depth) {
         return moves.front();
     }
 
-    // DebugUtils::prettyPrintMove(bestMove);
+    transpositionTable.store(board.zobristHash, depth, alpha, bestMove, TranspositionTable::Flag::EXACT);
+
     return bestMove;
 }
 
@@ -99,6 +98,26 @@ int MoveGenerator::negaMax(Board& board, int depth, int alpha, int beta) {
     if (depth == 0) {
         return quiescence(board, alpha, beta, 5);
     }
+
+    auto entry = transpositionTable.search(board.zobristHash);
+    if (entry.valid && entry.depth >= depth) {
+        if (entry.flag == TranspositionTable::Flag::EXACT) {
+            return entry.score;
+        }
+        if (entry.flag == TranspositionTable::Flag::LOWERBOUND) {
+            alpha = std::max(alpha, entry.score);
+        }
+        else {
+            beta = std::min(beta, entry.score);
+        }
+        if (alpha >= beta) {
+            return alpha;
+        }
+    }
+
+    int originalAlpha = alpha;
+    int bestScore = -INF;
+    auto bestMove = Move(0,0,Piece::WHITE_PAWN);
 
     vector<Move> moves;
     generateLegalMoves(moves, board, false);
@@ -111,10 +130,10 @@ int MoveGenerator::negaMax(Board& board, int depth, int alpha, int beta) {
         return 0;
     }
 
-    int bestScore = -INF;
     for (const Move& move : moves) {
         uint64_t oldZobrist = board.zobristHash;
         board.makeMove(move);
+        board.zobristHistory.push_back(board.zobristHash);
         uint64_t newZobrist = board.zobristHash;
 
         int score;
@@ -126,19 +145,39 @@ int MoveGenerator::negaMax(Board& board, int depth, int alpha, int beta) {
             assert(board.zobristHash == newZobrist);
         }
 
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+        }
+
         DebugUtils::numExploredPositions++;
+        board.zobristHistory.pop_back();
         board.unmakeMove(move);
         assert(board.zobristHash == oldZobrist);
 
         if (score >= beta) {
-            return beta;
+            transpositionTable.store(board.zobristHash, depth, score, move, TranspositionTable::Flag::LOWERBOUND);
+            return score;
         }
 
         if (score > alpha) {
             alpha = score;
         }
     }
-    return alpha;
+    TranspositionTable::Flag flag;
+
+    if (bestScore <= originalAlpha) {
+        // Means this route could not improve on alpha
+        flag = TranspositionTable::Flag::UPPERBOUND;
+    } else if (bestScore >= beta) {
+        // Means this route was so good opponent would never allow it.
+        flag = TranspositionTable::Flag::LOWERBOUND;
+    } else {
+        flag = TranspositionTable::Flag::EXACT;
+    }
+
+    transpositionTable.store(board.zobristHash, depth, bestScore, bestMove, flag);
+    return bestScore;
 }
 
 int MoveGenerator::quiescence(Board& board, int alpha, int beta, int depth) {

@@ -11,6 +11,7 @@
 #include "Board.h"
 #include "Evaluator.h"
 #include "Move.h"
+#include "TranspositionTable.h"
 
 /*
  * getBestMove returns the best move found by the engine
@@ -38,7 +39,7 @@ class MoveGenerator {
         static uint64_t getPawnAttacksForSquare(Board& board, uint64_t square, Color color);
         void generateLegalMoves(std::vector<Move>& outMoves, Board& board, bool onlyCaptures);
     private:
-
+        TranspositionTable transpositionTable;
         std::mt19937 rng;
         int INF = 1'000'000;
         int MATE_SCORE = 900'000;

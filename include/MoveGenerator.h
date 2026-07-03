@@ -37,9 +37,7 @@ class MoveGenerator {
         static bool isSquareAttacked(Board& board, uint64_t bitboardPosition, Color color);
         static uint64_t getPawnAttacksForSquare(Board& board, uint64_t square, Color color);
         void generateLegalMoves(std::vector<Move>& outMoves, Board& board, bool onlyCaptures);
-        void testZobristHash(Board& board, Move move);
     private:
-        std::vector<uint64_t> zobristHistory;
 
         std::mt19937 rng;
         int INF = 1'000'000;

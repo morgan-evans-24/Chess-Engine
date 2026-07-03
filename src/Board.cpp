@@ -17,8 +17,6 @@ Board::Board() {
     history = std::vector<UndoInfo>{};
 };
 
-// TODO This needs to update castling permissions on king and rook moves, not just castling. This is necessary for Zobrist hashing
-// TODO Then, same needs to be done for en-passant.
 void Board::makeMove(const Move& move) {
     const uint64_t endSquareBB = move.getEndSquare();
     const uint64_t startSquareBB = move.getStartSquare();

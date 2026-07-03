@@ -45,8 +45,6 @@ bool isThreefoldRepetition(const std::vector<uint64_t>& history) {
 }
 
 Move MoveGenerator::getBestMove(Board& board, const int depth) {
-    zobristHistory.clear();
-    zobristHistory.push_back(board.zobristHash);
     vector<Move> moves;
     generateLegalMoves(moves, board, false);
     auto bestMove= Move(0,0,Piece::WHITE_PAWN);
@@ -61,10 +59,10 @@ Move MoveGenerator::getBestMove(Board& board, const int depth) {
     for (const Move& move : moves) {
         uint64_t oldZobrist = board.zobristHash;
         board.makeMove(move);
-        zobristHistory.push_back(board.zobristHash);
+        board.zobristHistory.push_back(board.zobristHash);
         uint64_t newZobrist = board.zobristHash;
         int score;
-        if (isThreefoldRepetition(zobristHistory)) {
+        if (isThreefoldRepetition(board.zobristHistory)) {
             score = 0;
         } else {
             score = -negaMax(board, depth - 1, -beta, -alpha);
@@ -76,7 +74,7 @@ Move MoveGenerator::getBestMove(Board& board, const int depth) {
         // For a depth of 3
         // generate moves once in here
         // flip result of negaMax
-        zobristHistory.pop_back();
+        board.zobristHistory.pop_back();
         board.unmakeMove(move);
         assert(board.zobristHash == oldZobrist);
 
@@ -121,7 +119,7 @@ int MoveGenerator::negaMax(Board& board, int depth, int alpha, int beta) {
 
         int score;
 
-        if (isThreefoldRepetition(zobristHistory)) {
+        if (isThreefoldRepetition(board.zobristHistory)) {
             score = 0;
         } else {
             score = -negaMax(board, depth - 1, -beta, -alpha);

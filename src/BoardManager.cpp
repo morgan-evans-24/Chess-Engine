@@ -24,6 +24,7 @@ void BoardManager::newGame() {
     board.zobristHash = 0;
 }
 void BoardManager::setPosition(const string& FENString) {
+    board.zobristHistory.clear();
     MoveParser::parseFenString(board, FENString);
 }
 
@@ -42,7 +43,9 @@ void BoardManager::setActiveColour(const Color colour) {
 string BoardManager::search() {
 
     DebugUtils::startMoveTimer();
+
     Move bestMove = moveGenerator.getBestMove(board, depth);
+
     DebugUtils::printMoveTime();
     DebugUtils::printNumExploredPositions();
 

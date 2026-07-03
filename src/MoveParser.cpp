@@ -102,6 +102,8 @@ void MoveParser::parseFenString(Board& board, const string& FENString) {
     // Full move clock
     getline(ss, temp, delimiter);
     BoardManager::fullMoveClock = std::stoi(temp);
+
+    board.zobristHistory.push_back(board.zobristHash);
 }
 
 void MoveParser::parseMove(Board& board, const std::string& moveString) {
@@ -124,13 +126,30 @@ void MoveParser::parseMove(Board& board, const std::string& moveString) {
     auto move = Move(startBB, endBB, board.getPieceAtSquare(startBB));
 
 
+
     // Move is a promotion
     if (moveString.length() > 4) {
-        promotionPiece = charToPieceMap.at(moveString[4]);
         move.isPromotion = true;
-        move.promotionType = promotionPiece;
-    }
 
+        const bool isWhite = board.whoseTurn == Color::WHITE;
+
+        switch (moveString[4]) {
+            case 'q':
+                move.promotionType = isWhite ? Piece::WHITE_QUEEN : Piece::BLACK_QUEEN;
+                break;
+            case 'r':
+                move.promotionType = isWhite ? Piece::WHITE_ROOK : Piece::BLACK_ROOK;
+                break;
+            case 'b':
+                move.promotionType = isWhite ? Piece::WHITE_BISHOP : Piece::BLACK_BISHOP;
+                break;
+            case 'n':
+                move.promotionType = isWhite ? Piece::WHITE_KNIGHT : Piece::BLACK_KNIGHT;
+                break;
+            default:
+                throw std::runtime_error("Invalid promotion piece");
+        }
+    }
 
     if (isPawn(movePiece) & (endBB == board.enPassantSquare)) {
         move.enPassant = true;
@@ -151,6 +170,7 @@ void MoveParser::parseMove(Board& board, const std::string& moveString) {
     }
 
     board.makeMove(move);
+    board.zobristHistory.push_back(board.zobristHash);
     DebugUtils::printBoardState(board);
 }
 

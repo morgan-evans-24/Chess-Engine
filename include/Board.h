@@ -85,6 +85,7 @@ class Board {
         std::vector<UndoInfo> history;
 
         uint64_t zobristHash = 0;
+        std::vector<uint64_t> zobristHistory;
     private:
         uint64_t bitboards[12]{};
         Piece pieces[12] = {

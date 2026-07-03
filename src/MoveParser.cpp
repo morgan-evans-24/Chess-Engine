@@ -107,8 +107,6 @@ void MoveParser::parseFenString(Board& board, const string& FENString) {
 }
 
 void MoveParser::parseMove(Board& board, const std::string& moveString) {
-    // TODO, make parsing moves change castling permissions
-
     // Step one, split string
     char startFile = moveString[0];
     int startRank = moveString[1] - '0';

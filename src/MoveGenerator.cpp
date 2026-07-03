@@ -24,7 +24,7 @@ using std::to_string;
 
 auto shift = Board::shift;
 
-MoveGenerator::MoveGenerator() : transpositionTable(256) {
+MoveGenerator::MoveGenerator() : transpositionTable(512) {
     evaluator = Evaluator();
     std::srand(std::time(nullptr));
 }
@@ -101,6 +101,7 @@ int MoveGenerator::negaMax(Board& board, int depth, int alpha, int beta) {
 
     auto entry = transpositionTable.search(board.zobristHash);
     if (entry.valid && entry.depth >= depth) {
+        DebugUtils::numTranspositionTableHits++;
         if (entry.flag == TranspositionTable::Flag::EXACT) {
             return entry.score;
         }
@@ -267,9 +268,7 @@ bool MoveGenerator::isSquareAttacked(Board& board, const uint64_t bitboardPositi
 
 void MoveGenerator::orderMoves(Board& board, std::vector<Move>& moves) {
     for (Move& move : moves) {
-        //DebugUtils::prettyPrintMove(move);
         move.moveScore = evaluator.evaluateMove(board, move);
-        //DebugUtils::debugPrint("Score: " + std::to_string(move.moveScore));
     }
     std::nth_element(moves.begin(), moves.begin(), moves.end(),
                  [board](const Move& a, const Move& b) {
@@ -299,7 +298,6 @@ void MoveGenerator::generateLegalMoves(std::vector<Move>& outMoves, Board& board
 }
 
 void MoveGenerator::generatePseudoLegalMoves(std::vector<Move>& moves, Board& board) {
-    // For future note, should probably make this append capturing moves first, because mini-max gets better that way
     vector<Move> pawnMoves = generatePawnMoves(board);
     vector<Move> knightMoves = generateKnightMoves(board);
     vector<Move> bishopMoves = generateBishopMoves(board);

@@ -15,6 +15,7 @@
 time_point<steady_clock> DebugUtils::timeBeforeMove;
 int DebugUtils::numExploredPositions = 0;
 int DebugUtils::numExploredQuiescencePositions = 0;
+int DebugUtils::numTranspositionTableHits = 0;
 
 void DebugUtils::printBitboard(uint64_t bitboard) {
     if (!debugMode) {
@@ -217,8 +218,10 @@ void DebugUtils::printNumExploredPositions() {
     if (!debugMode) return;
     std::cout << "Explored " << numExploredPositions << " positions." << std::endl;
     std::cout << "Explored " << numExploredQuiescencePositions << " quiescence positions." << std::endl;
+    std::cout << "Had " << numTranspositionTableHits << " transposition table hits." << std::endl;
     numExploredPositions = 0;
     numExploredQuiescencePositions = 0;
+    numTranspositionTableHits = 0;
 }
 
 

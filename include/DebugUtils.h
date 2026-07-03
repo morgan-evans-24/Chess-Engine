@@ -29,6 +29,7 @@ class DebugUtils {
         static constexpr bool debugMode = false;
         static int numExploredPositions;
         static int numExploredQuiescencePositions;
+        static int numTranspositionTableHits;
 
     private:
         static time_point<steady_clock> timeBeforeMove;

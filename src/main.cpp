@@ -7,6 +7,7 @@
 
 int main() {
     Zobrist::initialise();
+    OpeningBook::initialize();
     auto boardManager = BoardManager();
     auto uciManager = UCIManager(boardManager);
     uciManager.prelogue();

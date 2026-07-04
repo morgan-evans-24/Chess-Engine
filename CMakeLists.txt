@@ -38,4 +38,6 @@ add_executable(Chess_Engine src/main.cpp
         include/Zobrist.h
         src/TranspositionTable.cpp
         include/TranspositionTable.h
+        src/OpeningBook.cpp
+        include/OpeningBook.h
 )

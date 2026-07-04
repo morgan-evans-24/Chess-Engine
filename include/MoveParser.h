@@ -14,6 +14,7 @@ class MoveParser {
     public:
         static void parseFenString(Board& board, const std::string& FENString);
         static void parseMove(Board& board, const std::string& moveString);
+        static std::string PGNToUCI(Board& board, std::string pgn);
     private:
         static std::unordered_map<char, Piece> charToPieceMap;
 };

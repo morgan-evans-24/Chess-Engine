@@ -25,6 +25,7 @@ void BoardManager::newGame() {
 }
 void BoardManager::setPosition(const string& FENString) {
     board.zobristHistory.clear();
+    board.zobristHash = 0;
     MoveParser::parseFenString(board, FENString);
 }
 
@@ -59,6 +60,13 @@ string BoardManager::search() {
         returnString += pieceCharMap[static_cast<int>(bestMove.promotionType)];
     }
     return returnString;
+}
+
+string BoardManager::pollOpenBook() const {
+    DebugUtils::startMoveTimer();
+    string move = OpeningBook::lookup(board.zobristHash);
+    DebugUtils::printMoveTime();
+    return move;
 }
 
 

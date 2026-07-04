@@ -11,9 +11,6 @@ uint64_t Zobrist::castleKeys[16];
 uint64_t Zobrist::enPassantKeys[64];
 uint64_t Zobrist::blackToMoveKey;
 
-Zobrist::Zobrist() = default;
-
-
 void Zobrist::initialise() {
     std::mt19937_64 rng(0x123456789ABCDEF);
 

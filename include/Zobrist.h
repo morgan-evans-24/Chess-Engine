@@ -9,7 +9,6 @@
 
 class Zobrist {
     public:
-        Zobrist();
         static void initialise();
         static uint64_t pieceKeys[12][64];
         static uint64_t blackToMoveKey;

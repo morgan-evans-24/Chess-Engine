@@ -55,6 +55,9 @@ void UCIManager::writeLine(string line) {
 }
 
 void UCIManager::mainLoop() {
+    bool useOpeningBook = false;
+    int numOpeningMoves = OpeningBook::numOpeningBookMoves;
+
     string uci_input;
     string temp;
     std::istringstream ss = std::istringstream(uci_input);
@@ -75,18 +78,22 @@ void UCIManager::mainLoop() {
             getline(ss, temp, delimiter);
             if (temp == "startpos") {
                 boardManager.setPosition(startposAsFen);
+                useOpeningBook = true;
             } else if (temp == "fen") {
                 getline(ss, temp);
                 boardManager.setPosition(temp);
+                useOpeningBook = false;
             }
             getline(ss, temp, delimiter);
             if (temp == "moves") {
                 int movecount = 0;
+                numOpeningMoves = OpeningBook::numOpeningBookMoves;
                 getline(ss, temp, delimiter);
                 while (!temp.empty()) {
                     boardManager.makeMove(temp);
                     temp.clear();
                     getline(ss, temp, delimiter);
+                    numOpeningMoves--;
                 }
             }
 
@@ -100,10 +107,21 @@ void UCIManager::mainLoop() {
                 } else if (temp == "depth") {
                     getline(ss, temp, delimiter);
                     const int depth = std::stoi(temp);
-                    boardManager.setDepth(depth);
+                    BoardManager::setDepth(depth);
                 }
             }
-            string bestMove = boardManager.search();
+            string bestMove;
+            bool openBookSearch = useOpeningBook && numOpeningMoves > 0;
+            bool noOpenBookMoveFound = false;
+            if (openBookSearch) {
+                bestMove = boardManager.pollOpenBook();
+                if (bestMove == "NOMOVE") {
+                    noOpenBookMoveFound = true;
+                }
+            }
+            if (noOpenBookMoveFound || !openBookSearch) {
+                bestMove = boardManager.search();
+            }
             std::string response =  "bestmove " + bestMove + '\n';
             writeLine(response);
         }

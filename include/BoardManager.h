@@ -9,6 +9,7 @@
 #include "Board.h"
 #include "MoveParser.h"
 #include "MoveGenerator.h"
+#include "OpeningBook.h"
 
 
 class BoardManager {
@@ -20,12 +21,14 @@ class BoardManager {
         static void setDepth(int setDepth);
         void setActiveColour(Color colour);
         std::string search();
+        std::string pollOpenBook() const;
         static inline int fullMoveClock;
         static inline int halfMoveClock;
         static int depth;
     private:
         Board board;
         MoveGenerator moveGenerator;
+        OpeningBook openingBook;
         static constexpr std::array<const char*, 64> squareMap = {
             "a1","b1","c1","d1","e1","f1","g1","h1",
             "a2","b2","c2","d2","e2","f2","g2","h2",

@@ -40,9 +40,6 @@ int Evaluator::evaluateBoard(Board& board) {
     blackScore += positionValue(board, Color::BLACK);
 
     finalScore = whiteScore - blackScore;
-    // if (RuleChecker::isCheckmate(board)) {
-        // finalScore = MATE_SCORE;
-    // }
     int perspective = board.whoseTurn == Color::WHITE ? 1 : -1;
     finalScore *= perspective;
     return finalScore;
@@ -61,7 +58,6 @@ int Evaluator::evaluateMove(Board& board, const Move& move) {
         score += getValueOfPiece(move.promotionType);
     }
 
-    uint64_t pawnAttacks = MoveGenerator::getPawnAttacksForSquare(board, move.getEndSquare(), board.whoseTurn);
     uint64_t enemyPawns = board.whoseTurn == Color::WHITE ? board.getBlackPawns() : board.getWhitePawns();
     if (MoveGenerator::getPawnAttacksForSquare(board, move.getEndSquare(), board.whoseTurn) & enemyPawns) {
         score -= getValueOfPiece(movingPiece);

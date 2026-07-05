@@ -107,7 +107,10 @@ void MoveParser::parseFenString(Board& board, const string& FENString) {
 }
 
 void MoveParser::parseMove(Board& board, const std::string& moveString) {
-    // Step one, split string
+    if (board.whoseTurn == Color::BLACK) {
+        BoardManager::fullMoveClock++;
+    }
+
     char startFile = moveString[0];
     int startRank = moveString[1] - '0';
     int startSquare = (startRank-1) * 8 + startFile - 'a';

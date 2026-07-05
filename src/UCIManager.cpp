@@ -75,6 +75,7 @@ void UCIManager::mainLoop() {
         }
 
         if (temp == "position") {
+            BoardManager::fullMoveClock = 0;
             getline(ss, temp, delimiter);
             if (temp == "startpos") {
                 boardManager.setPosition(startposAsFen);
